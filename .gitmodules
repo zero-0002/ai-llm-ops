@@ -1,0 +1,3 @@
+[submodule "Week"]
+	path = Week
+	url = git@github.com:AI-Maker-Space/LangChain-Concepts-101---Build-Your-Own-RAQA-System.git
