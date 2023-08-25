@@ -1,1 +1,11 @@
-ipykernel
+chainlit==0.6.2
+openai==0.27.8
+llama-index==0.8.6
+nltk==3.8.1
+chromadb==0.4.6
+tiktoken==0.4.0
+sentence-transformers==2.2.2
+pydantic==1.10.11
+wikipedia
+sqlalchemy
+pandas
