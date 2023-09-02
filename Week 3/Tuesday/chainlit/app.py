@@ -47,7 +47,7 @@ class Llama2FastAPI(LLM):
             }
         }
 
-        response = requests.post("http://localhost:8000/generateText", json=json_body) # not sure if this is right ... 80 or 8000?
+        response = requests.post("http://3.90.153.71:8000/generateText", json=json_body) # not sure if this is right ... 80 or 8000?
 
         return response.json()[0]["generation"]["content"]
 

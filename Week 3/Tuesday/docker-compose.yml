@@ -36,7 +36,7 @@ services:
       - 6379:6379
   langchain-chainlit-chat-app:
     build: ./chainlit
-    command: chainlit run chainlit/app.py
+    command: chainlit run app.py --port 7860
     volumes:
       - ./chainlit:/app
     ports:
