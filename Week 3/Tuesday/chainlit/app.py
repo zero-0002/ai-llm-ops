@@ -3,7 +3,9 @@ from langchain.document_loaders import PyMuPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Chroma
 from langchain.chains import RetrievalQAWithSourcesChain
-from langchain.chat_models import ChatOpenAI
+# from langchain.chat_models import ChatOpenAI
+from langchain.callbacks.manager import CallbackManagerForLLMRun
+from langchain.llms.base import LLM
 from langchain.prompts.chat import (
     ChatPromptTemplate,
     SystemMessagePromptTemplate,
@@ -13,6 +15,50 @@ import os
 import arxiv
 import chainlit as cl
 from chainlit import user_session
+from typing import Any, List, Mapping, Optional
+import requests
+
+class Llama2FastAPI(LLM):
+    max_new_tokens: int = 256
+    top_p: float = 0.9
+    temperature: float = 0.1
+
+    @property
+    def _llm_type(self) -> str:
+        return "Llama2FastAPI"
+
+    def _call(
+        self,
+        prompt: str,
+        stop: Optional[List[str]] = None,
+        run_manager: Optional[CallbackManagerForLLMRun] = None,
+    ) -> str:
+        if stop is not None:
+            raise ValueError("stop kwargs are not permitted.")
+
+        json_body = {
+            "inputs" : [
+              [{"role" : "user", "content" : prompt}]
+            ],
+            "parameters" : {
+                "max_new_tokens" : self.max_new_tokens,
+                "top_p" : self.top_p,
+                "temperature" : self.temperature
+            }
+        }
+
+        response = requests.post("http://localhost:8000/generateText", json=json_body) # not sure if this is right ... 80 or 8000?
+
+        return response.json()[0]["generation"]["content"]
+
+    @property
+    def _identifying_params(self) -> Mapping[str, Any]:
+        """Get the identifying parameters."""
+        return {
+            "max_new_tokens" : self.max_new_tokens,
+            "top_p" : self.top_p,
+            "temperature" : self.temperature
+        }
 
 @cl.langchain_factory(use_async=True)
 async def init():
@@ -55,10 +101,13 @@ async def init():
 
     # Create a chain that uses the Chroma vector store
     chain = RetrievalQAWithSourcesChain.from_chain_type(
-        ChatOpenAI(
-            model_name="gpt-3.5-turbo-16k",
-            temperature=0,
-        ),
+        # # old
+        # ChatOpenAI(
+        #     model_name="gpt-3.5-turbo-16k",
+        #     temperature=0,
+        # ),
+        # # new
+        Llama2FastAPI(),
         chain_type="stuff",
         retriever=docsearch.as_retriever(),
         return_source_documents=True,

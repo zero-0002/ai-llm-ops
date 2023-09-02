@@ -40,4 +40,4 @@ services:
     volumes:
       - ./chainlit:/app
     ports:
-      - 7860:8000
+      - 7860:7860
